@@ -1,23 +1,22 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { api } from '../context/AuthContext';
 
 export const fetchEntries = async () => {
-  const response = await axios.get(`${API_URL}/entries`);
+  const response = await api.get(`/entries`);
   return response.data;
 };
 
 export const createEntry = async (entryData: any) => {
-  const response = await axios.post(`${API_URL}/entries`, entryData);
+  const response = await api.post(`/entries`, entryData);
   return response.data;
 };
 
 export const updateEntry = async (id: string, entryData: any) => {
-  const response = await axios.put(`${API_URL}/entries/${id}`, entryData);
+  const response = await api.put(`/entries/${id}`, entryData);
   return response.data;
 };
 
 export const deleteEntry = async (id: string) => {
-  const response = await axios.delete(`${API_URL}/entries/${id}`);
+  const response = await api.delete(`/entries/${id}`);
   return response.data;
 };

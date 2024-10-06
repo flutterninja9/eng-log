@@ -1,5 +1,6 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { login as apiLogin, register as apiRegister, logout as apiLogout } from '../api/auth';
+import axios from 'axios';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { login as apiLogin, logout as apiLogout, register as apiRegister } from '../api/auth';
 
 interface User {
   id: string;
@@ -14,6 +15,20 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
+// Create an Axios instance
+export const api = axios.create({
+  baseURL: 'http://localhost:8080/api',
+});
+
+// Set up the default Authorization header
+const setAuthHeader = (token: string | null) => {
+  if (token) {
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common['Authorization'];
+  }
+};
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -22,7 +37,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      setAuthHeader(parsedUser.token); // Set token if user exists
     }
   }, []);
 
@@ -30,18 +47,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userData = await apiLogin(email, password);
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
+    setAuthHeader(userData.token); // Set token after login
   };
 
   const register = async (name: string, email: string, password: string) => {
     const userData = await apiRegister(name, email, password);
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
+    setAuthHeader(userData.token); // Set token after registration
   };
 
   const logout = async () => {
     await apiLogout();
     setUser(null);
     localStorage.removeItem('user');
+    setAuthHeader(null); // Remove token on logout
   };
 
   return (

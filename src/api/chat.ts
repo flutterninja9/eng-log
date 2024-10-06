@@ -1,8 +1,6 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { api } from "../context/AuthContext";
 
 export const sendChatMessage = async (message: string) => {
-  const response = await axios.post(`${API_URL}/chat`, { message });
+  const response = await api.post(`/chat`, { message });
   return response.data;
 };
